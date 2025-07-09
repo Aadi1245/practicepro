@@ -1,15 +1,7 @@
-
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "build/web/**",
-      "use": "@vercel/static"
-    }
-  ],
   "rewrites": [
     {
-      "source": "/((?!MyCV.pdf).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
@@ -20,12 +12,9 @@
         {
           "key": "Content-Type",
           "value": "application/pdf"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
   ]
 }
+
