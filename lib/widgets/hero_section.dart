@@ -201,3 +201,12 @@ class HeroSection extends StatelessWidget {
     );
   }
 }
+
+// {
+//   "rewrites": [
+//     {
+//       "source": "/(.*)",
+//       "destination": "/index.html"
+//     }
+//   ]
+// }
