@@ -182,48 +182,22 @@ class HeroSection extends StatelessWidget {
     );
   }
 
-// Google Drive direct download link for the CV
+  // CV file hosted in the project's public folder
   static const String cvDownloadUrl =
-      'https://drive.google.com/uc?export=download&id=1-Z8eTzz_63mM4AXoPSDA9_2mzRUDmpYp'; // Replace FILE_ID with your actual Google Drive file ID
-
+      '/MyCV.pdf'; // Relative path to the CV in the public folder
   static const String cvFileName =
-      'MyCV.pdf'; // Desired name for the downloaded file
+      '${AppConstants.developerName}CV.pdf'; // Name for the downloaded file
 
-  // Function to download the CV using Dio
-  Future<void> _downloadCV(BuildContext context) async {
-    try {
-      // Initialize Dio
-      final dio = Dio();
+  // Function to download the CV using dart:html
+  void _downloadCV(BuildContext context) {
+    // Create an anchor element to trigger the download
+    final anchor = html.AnchorElement(href: cvDownloadUrl)
+      ..setAttribute('download', cvFileName)
+      ..click();
 
-      // Show loading indicator
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Downloading CV...')),
-      );
-
-      // Fetch the file as bytes
-      final response = await dio.get(
-        cvDownloadUrl,
-        options: Options(responseType: ResponseType.bytes),
-      );
-
-      // Create a blob and trigger download in the browser
-      final blob = html.Blob([response.data]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
-        ..setAttribute('download', cvFileName)
-        ..click();
-      html.Url.revokeObjectUrl(url);
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CV downloaded successfully')),
-      );
-    } catch (e) {
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to download CV: $e')),
-      );
-      debugPrint('Download error: $e');
-    }
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('CV download started')),
+    );
   }
 }
