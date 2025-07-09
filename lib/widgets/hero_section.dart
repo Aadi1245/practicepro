@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
+import 'dart:html' as html;
 import '../utils/app_colors.dart';
 import '../utils/app_constants.dart';
 
@@ -23,7 +26,7 @@ class HeroSection extends StatelessWidget {
         child: isDesktop
             ? Row(
                 children: [
-                  Expanded(child: _buildContent()),
+                  Expanded(child: _buildContent(context)),
                   const SizedBox(width: 40),
                   Expanded(child: _buildImage()),
                 ],
@@ -31,7 +34,7 @@ class HeroSection extends StatelessWidget {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildContent(),
+                  _buildContent(context),
                   const SizedBox(height: 40),
                   _buildImage(),
                 ],
@@ -40,7 +43,7 @@ class HeroSection extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +114,7 @@ class HeroSection extends StatelessWidget {
         Row(
           children: [
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () => _downloadCV(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: AppColors.primary,
@@ -177,5 +180,50 @@ class HeroSection extends StatelessWidget {
         ),
       ),
     );
+  }
+
+// Google Drive direct download link for the CV
+  static const String cvDownloadUrl =
+      'https://drive.google.com/uc?export=download&id=1-Z8eTzz_63mM4AXoPSDA9_2mzRUDmpYp'; // Replace FILE_ID with your actual Google Drive file ID
+
+  static const String cvFileName =
+      'MyCV.pdf'; // Desired name for the downloaded file
+
+  // Function to download the CV using Dio
+  Future<void> _downloadCV(BuildContext context) async {
+    try {
+      // Initialize Dio
+      final dio = Dio();
+
+      // Show loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Downloading CV...')),
+      );
+
+      // Fetch the file as bytes
+      final response = await dio.get(
+        cvDownloadUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      // Create a blob and trigger download in the browser
+      final blob = html.Blob([response.data]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', cvFileName)
+        ..click();
+      html.Url.revokeObjectUrl(url);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('CV downloaded successfully')),
+      );
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download CV: $e')),
+      );
+      debugPrint('Download error: $e');
+    }
   }
 }
